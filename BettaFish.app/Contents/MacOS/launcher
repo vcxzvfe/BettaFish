@@ -1,0 +1,139 @@
+#!/bin/zsh
+# BettaFish 微舆 - macOS .app launcher (v0.3)
+#
+# v0.3: addresses Codex P2 findings
+#   - BETTAFISH_DIR derived from bundle location (no hardcoded ~/Projects/...)
+#     with optional override via $BETTAFISH_DIR env var
+#   - PORT read from .env (BettaFish source of truth), default 5001
+#     (macOS ControlCenter holds 5000 on most setups → 403 instead of Flask)
+#   - PORT exported to Flask child so the launcher and the server agree
+#
+# v0.2 carry-over:
+#   - mkdir-based atomic lock prevents duplicate launcher instances
+#   - stale-PID cleanup so Force Quit leftovers don't fool the alive check
+set -euo pipefail
+
+# --- Resolve BettaFish project directory --------------------------------------
+# Priority: explicit env override > bundle-relative inference > common fallbacks
+if [[ -n "${BETTAFISH_DIR:-}" && -d "${BETTAFISH_DIR}" ]]; then
+    :
+else
+    SCRIPT_PATH="${0:A}"  # zsh: absolute resolved path
+    SCRIPT_DIR="${SCRIPT_PATH:h}"  # .../BettaFish.app/Contents/MacOS
+    INFERRED_DIR="$(cd "$SCRIPT_DIR/../../.." 2>/dev/null && pwd || echo "")"
+    if [[ -n "$INFERRED_DIR" && -x "$INFERRED_DIR/.venv/bin/python" ]]; then
+        BETTAFISH_DIR="$INFERRED_DIR"
+    else
+        # Fallbacks for when the .app is detached (e.g. dragged to /Applications)
+        for candidate in "$HOME/Projects/BettaFish" "$HOME/Code/BettaFish" "$HOME/BettaFish"; do
+            if [[ -x "$candidate/.venv/bin/python" ]]; then
+                BETTAFISH_DIR="$candidate"
+                break
+            fi
+        done
+    fi
+fi
+
+# --- Read PORT from project .env (or default to 5001) -------------------------
+PORT="5001"
+if [[ -n "${BETTAFISH_DIR:-}" && -f "$BETTAFISH_DIR/.env" ]]; then
+    PORT_FROM_ENV="$(awk -F= '/^[[:space:]]*PORT[[:space:]]*=/ { sub(/[[:space:]]*#.*$/, "", $2); gsub(/[[:space:]]/, "", $2); print $2; exit }' "$BETTAFISH_DIR/.env" 2>/dev/null || true)"
+    if [[ "$PORT_FROM_ENV" =~ ^[0-9]+$ ]]; then
+        PORT="$PORT_FROM_ENV"
+    fi
+fi
+
+LOG_DIR="$HOME/Library/Logs/BettaFish"
+LOG_FILE="$LOG_DIR/bettafish.log"
+PID_FILE="$LOG_DIR/bettafish.pid"
+LOCK_DIR="$LOG_DIR/launcher.lock"
+URL="http://127.0.0.1:$PORT/"
+
+mkdir -p "$LOG_DIR"
+
+is_alive() {
+    [[ "$(curl -s -o /dev/null --max-time 2 -w '%{http_code}' "$URL" 2>/dev/null)" == "200" ]]
+}
+
+notify() {
+    osascript -e "display notification \"$2\" with title \"$1\" sound name \"Glass\"" 2>/dev/null || true
+}
+
+err_dialog() {
+    osascript -e "display dialog \"$1\" buttons {\"OK\"} default button \"OK\" with icon stop" 2>/dev/null || true
+}
+
+release_lock() {
+    rmdir "$LOCK_DIR" 2>/dev/null || true
+}
+
+# --- Fail fast if we still can't locate the project ---------------------------
+if [[ -z "${BETTAFISH_DIR:-}" || ! -x "$BETTAFISH_DIR/.venv/bin/python" ]]; then
+    err_dialog "无法定位 BettaFish 项目目录（venv 缺失）。\\n请设置环境变量 BETTAFISH_DIR 指向 fork 根目录，或在该目录执行：\\n  uv venv --python 3.12 .venv\\n  uv pip install -r requirements.txt"
+    exit 1
+fi
+
+# --- Atomic single-instance lock (mkdir is atomic) ---------------------------
+if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+    if is_alive; then
+        open "$URL"
+        notify "微舆 BettaFish" "已在运行，浏览器已打开"
+    else
+        notify "微舆 BettaFish" "另一个 launcher 正在启动，请稍候"
+    fi
+    exit 0
+fi
+
+# --- Stale PID cleanup (Force Quit etc.) -------------------------------------
+if [[ -f "$PID_FILE" ]]; then
+    OLD_PID="$(cat "$PID_FILE" 2>/dev/null || echo "")"
+    if [[ -z "$OLD_PID" ]] || ! kill -0 "$OLD_PID" 2>/dev/null; then
+        rm -f "$PID_FILE"
+    fi
+fi
+
+# --- Case 1: server already up → open browser and exit -----------------------
+if is_alive; then
+    release_lock
+    open "$URL"
+    notify "微舆 BettaFish" "已在运行，浏览器已打开"
+    exit 0
+fi
+
+# --- Case 2: cold start ------------------------------------------------------
+cd "$BETTAFISH_DIR"
+# Export PORT so app.py / pydantic-settings see the same value as the launcher.
+export PORT
+"$BETTAFISH_DIR/.venv/bin/python" app.py >> "$LOG_FILE" 2>&1 &
+FLASK_PID=$!
+echo "$FLASK_PID" > "$PID_FILE"
+
+cleanup() {
+    if [[ -n "${FLASK_PID:-}" ]] && kill -0 "$FLASK_PID" 2>/dev/null; then
+        kill "$FLASK_PID" 2>/dev/null || true
+        for i in {1..5}; do
+            kill -0 "$FLASK_PID" 2>/dev/null || break
+            sleep 1
+        done
+        kill -9 "$FLASK_PID" 2>/dev/null || true
+    fi
+    rm -f "$PID_FILE"
+    release_lock
+}
+trap cleanup EXIT INT TERM
+
+for i in {1..90}; do
+    is_alive && break
+    sleep 1
+done
+
+if ! is_alive; then
+    err_dialog "BettaFish 启动失败 (PORT=$PORT)，请查看日志：$LOG_FILE"
+    open "$LOG_FILE"
+    exit 1
+fi
+
+open "$URL"
+notify "微舆 BettaFish" "已启动 (PID $FLASK_PID, 端口 $PORT)"
+
+wait "$FLASK_PID"

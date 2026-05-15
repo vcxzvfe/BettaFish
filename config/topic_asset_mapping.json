@@ -1,0 +1,131 @@
+{
+  "schema_version": "0.1.0",
+  "last_updated": "2026-05-16",
+  "description": "话题→资产标的映射词典。当某话题在社群媒体出现 contrarian 信号时，ReportEngine 据此词典找对应可交易标的。仅供分析参考，不构成投资建议。",
+  "categories": {
+    "美妆_医美": {
+      "keywords": ["医美", "玻尿酸", "肉毒素", "童颜针", "光子嫩肤", "热玛吉", "皮秒", "美容仪", "颜值经济", "皮肤管理"],
+      "a_share": [
+        { "ticker": "300896.SZ", "name": "爱美客", "exposure": "玻尿酸/肉毒素/嗨体" },
+        { "ticker": "688363.SH", "name": "华熙生物", "exposure": "玻尿酸原料/润百颜/夸迪" }
+      ],
+      "hk_share": [
+        { "ticker": "2367.HK", "name": "巨子生物", "exposure": "可复美/可丽金" }
+      ],
+      "us_adr": []
+    },
+    "出境游_酒店_航空": {
+      "keywords": ["日本游", "泰国游", "迪士尼", "环球影城", "出境游", "护照", "免税店", "签证", "海岛游", "酒店预订"],
+      "a_share": [
+        { "ticker": "601888.SH", "name": "中国中免", "exposure": "免税店龙头" },
+        { "ticker": "603885.SH", "name": "吉祥航空", "exposure": "国际航线" }
+      ],
+      "hk_share": [
+        { "ticker": "9961.HK", "name": "携程集团-S", "exposure": "OTA 平台" }
+      ],
+      "us_adr": [
+        { "ticker": "TCOM", "name": "Trip.com Group", "exposure": "OTA" }
+      ]
+    },
+    "茶饮_咖啡": {
+      "keywords": ["奶茶", "霸王茶姬", "茶颜悦色", "喜茶", "瑞幸", "星巴克", "新茶饮", "9块9咖啡", "Manner", "蜜雪冰城"],
+      "a_share": [],
+      "hk_share": [
+        { "ticker": "2150.HK", "name": "奈雪的茶", "exposure": "高端新茶饮" },
+        { "ticker": "2097.HK", "name": "蜜雪集团", "exposure": "低价奶茶下沉市场" }
+      ],
+      "us_adr": [
+        { "ticker": "LKNCY", "name": "瑞幸咖啡", "exposure": "国内连锁咖啡" }
+      ]
+    },
+    "潮玩_IP": {
+      "keywords": ["泡泡玛特", "Labubu", "拉布布", "盲盒", "Molly", "Jellycat", "毛绒玩具", "潮玩", "二次元", "谷子经济"],
+      "a_share": [],
+      "hk_share": [
+        { "ticker": "9992.HK", "name": "泡泡玛特", "exposure": "Labubu/Molly/Skullpanda IP" },
+        { "ticker": "0772.HK", "name": "阅文集团", "exposure": "IP 内容源头" }
+      ],
+      "us_adr": []
+    },
+    "电商_直播_出海": {
+      "keywords": ["拼多多", "Temu", "TikTok Shop", "Shein", "shein", "小红书电商", "直播带货", "跨境电商"],
+      "a_share": [],
+      "hk_share": [
+        { "ticker": "9988.HK", "name": "阿里巴巴-W", "exposure": "淘天+国际" }
+      ],
+      "us_adr": [
+        { "ticker": "PDD", "name": "拼多多", "exposure": "国内主站+Temu" },
+        { "ticker": "BABA", "name": "阿里巴巴", "exposure": "淘天+海外" }
+      ]
+    },
+    "运动_户外": {
+      "keywords": ["lululemon", "Lululemon", "始祖鸟", "Salomon", "户外", "露营", "钓鱼", "骑行", "瑜伽", "飞盘", "山系", "Patagonia"],
+      "a_share": [
+        { "ticker": "002832.SZ", "name": "比音勒芬", "exposure": "高端运动" }
+      ],
+      "hk_share": [
+        { "ticker": "2331.HK", "name": "李宁", "exposure": "国货运动" },
+        { "ticker": "2020.HK", "name": "安踏体育", "exposure": "始祖鸟/Salomon/迪桑特母公司" }
+      ],
+      "us_adr": [
+        { "ticker": "LULU", "name": "Lululemon", "exposure": "高端瑜伽运动" }
+      ]
+    },
+    "宠物经济": {
+      "keywords": ["猫", "狗", "猫粮", "狗粮", "宠物用品", "宠物医院", "猫主子", "毛孩子", "宠物殡葬"],
+      "a_share": [
+        { "ticker": "002311.SZ", "name": "海大集团", "exposure": "宠物饲料" },
+        { "ticker": "002891.SZ", "name": "中宠股份", "exposure": "宠物食品" },
+        { "ticker": "300673.SZ", "name": "佩蒂股份", "exposure": "宠物零食出口" }
+      ],
+      "hk_share": [],
+      "us_adr": []
+    },
+    "新能源车_智驾": {
+      "keywords": ["小米SU7", "理想L", "蔚来", "小鹏", "比亚迪", "智驾", "FSD", "Robotaxi", "城市NOA", "L3", "纯电"],
+      "a_share": [
+        { "ticker": "300750.SZ", "name": "宁德时代", "exposure": "动力电池龙头" },
+        { "ticker": "002594.SZ", "name": "比亚迪", "exposure": "整车+电池" }
+      ],
+      "hk_share": [
+        { "ticker": "9866.HK", "name": "蔚来-SW", "exposure": "高端新势力" },
+        { "ticker": "9868.HK", "name": "小鹏汽车-W", "exposure": "智驾+海外" },
+        { "ticker": "1810.HK", "name": "小米集团-W", "exposure": "SU7/YU7" }
+      ],
+      "us_adr": [
+        { "ticker": "TSLA", "name": "Tesla", "exposure": "FSD/Robotaxi 风向标" }
+      ]
+    },
+    "AI_大模型_算力": {
+      "keywords": ["DeepSeek", "Claude", "ChatGPT", "AI智能体", "MaaS", "大模型", "AGI", "AI Agent", "千问", "Kimi"],
+      "a_share": [
+        { "ticker": "002230.SZ", "name": "科大讯飞", "exposure": "国产大模型" },
+        { "ticker": "300033.SZ", "name": "同花顺", "exposure": "金融AI" }
+      ],
+      "hk_share": [
+        { "ticker": "9888.HK", "name": "百度集团-SW", "exposure": "文心一言" }
+      ],
+      "us_adr": [
+        { "ticker": "NVDA", "name": "NVIDIA", "exposure": "AI 算力风向标" }
+      ]
+    },
+    "加密_Web3_meme": {
+      "keywords": ["比特币", "以太坊", "BTC", "ETH", "SOL", "meme币", "Trump币", "RWA", "Web3", "山寨币"],
+      "a_share": [],
+      "hk_share": [],
+      "us_adr": [],
+      "crypto": [
+        { "ticker": "BTC", "name": "Bitcoin", "exposure": "数字黄金基准" },
+        { "ticker": "ETH", "name": "Ethereum", "exposure": "智能合约平台" },
+        { "ticker": "SOL", "name": "Solana", "exposure": "高性能 L1" }
+      ]
+    }
+  },
+  "manual_overrides": {},
+  "notes": [
+    "本词典仅供分析参考，不构成投资建议。",
+    "请根据市场动态周期性维护：新增热点话题、剔除过时映射、更新主营业务变化。",
+    "若小红书话题未匹配任何 keyword，ReportEngine 应在 6.0 章节标记为 '待人工映射'。",
+    "match 策略：先精确关键词命中，再用 LLM 做语义近似匹配。"
+  ]
+}
